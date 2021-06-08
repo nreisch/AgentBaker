@@ -26,6 +26,7 @@ trigger: none
 
 variables:
   CONTAINER_IMAGE:  'mcr.microsoft.com/oss/azcu/go-dev:v1.28.5'
+  debug: 'True'
 
 phases:
   - phase: build_vhd
