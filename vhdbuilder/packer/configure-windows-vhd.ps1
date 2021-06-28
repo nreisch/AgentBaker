@@ -91,14 +91,16 @@ function Disable-WindowsUpdates {
 function Get-ContainerImages {
     if ($containerRuntime -eq 'containerd') {
         Write-Log "Pulling images for windows server 2019 with containerd"
-        # start containerd to pre-pull the images to disk on VHD
-        # CSE will configure and register containerd as a service at deployment time
-        Start-Job -Name containerd -ScriptBlock { containerd.exe }
         foreach ($image in $imagesToPull) {
             Retry-Command -ScriptBlock {
                 & ctr.exe -n k8s.io images pull $image
             } -ErrorMessage "Failed to pull image $image"
         }
+
+        # TODO: to be removed
+        "{0:N2} GB" -f ((Get-ChildItem C:\\ProgramData\\containerd\\root  -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1GB)
+        ctr  -n k8s.io content list
+
         Stop-Job  -Name containerd
         Remove-Job -Name containerd
     }
@@ -109,6 +111,9 @@ function Get-ContainerImages {
                 docker pull $image
             } -ErrorMessage "Failed to pull image $image"
         }
+
+        "{0:N2} GB" -f ((Get-ChildItem C:\ProgramData\docker  -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1GB)
+
     }
 }
 
